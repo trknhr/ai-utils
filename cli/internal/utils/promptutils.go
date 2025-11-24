@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/trknhr/chatgpt-dev-utils/internal/file"
+	"github.com/trknhr/ai-utils/internal/file"
 )
 
 // GenerateFilePrompt replaces $(files) in the template with the contents of selected files

@@ -6,8 +6,8 @@ import (
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/trknhr/chatgpt-dev-utils/internal/file"
-	"github.com/trknhr/chatgpt-dev-utils/internal/utils"
+	"github.com/trknhr/ai-utils/internal/file"
+	"github.com/trknhr/ai-utils/internal/utils"
 )
 
 type Final struct {

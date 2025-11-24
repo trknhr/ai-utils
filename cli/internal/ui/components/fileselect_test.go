@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
-	"github.com/trknhr/chatgpt-dev-utils/internal/file"
+	"github.com/trknhr/ai-utils/internal/file"
 )
 
 func TestFileSelect(t *testing.T) {

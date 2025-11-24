@@ -1,7 +1,7 @@
-# 🧠 ChatGPT Dev Utils (`cdev`)
+# 🧠 AI Utils (`cdev`)
 
 <p align="center">
-  <img src="img/image.png" alt="ChatGPT Dev Utils Icon" width="160" />
+  <img src="img/image.png" alt="AI Utils Icon" width="160" />
 </p>
 
 A developer-friendly CLI tool to send prompts directly to ChatGPT using your Chrome session. Perfect for commit messages, code review, explanations, and more — without using the OpenAI API.
@@ -20,7 +20,7 @@ A developer-friendly CLI tool to send prompts directly to ChatGPT using your Chr
 Install the latest release via:
 
 ```bash
-curl -sSfL https://raw.githubusercontent.com/trknhr/chatgpt-dev-utils/main/install.sh | sh
+curl -sSfL https://raw.githubusercontent.com/trknhr/ai-utils/main/install.sh | sh
 ```
 
 This will:
@@ -119,7 +119,7 @@ All templates are editable via TUI.
 
 ## 📬 Feedback & Contributions
 
-PRs and issues welcome → [github.com/trknhr/chatgpt-dev-utils](https://github.com/trknhr/chatgpt-dev-utils)
+PRs and issues welcome → [github.com/trknhr/ai-utils](https://github.com/trknhr/ai-utils)
 
 ## 📄 License
 

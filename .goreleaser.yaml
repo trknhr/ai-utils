@@ -27,4 +27,4 @@ checksum:
 release:
   github:
     owner: trknhr
-    name: chatgpt-dev-utils
+    name: ai-utils

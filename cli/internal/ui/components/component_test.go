@@ -6,7 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/stretchr/testify/assert"
-	"github.com/trknhr/chatgpt-dev-utils/internal/file"
+	"github.com/trknhr/ai-utils/internal/file"
 )
 
 // TestComponentInterface ensures all components properly implement the Component interface

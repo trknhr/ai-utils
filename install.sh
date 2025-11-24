@@ -2,7 +2,7 @@
 
 set -e
 
-REPO="trknhr/chatgpt-dev-utils"
+REPO="trknhr/ai-utils"
 BINARY_NAME="cdev"
 INSTALL_DIR="/usr/local/bin"
 

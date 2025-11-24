@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
-	"github.com/trknhr/chatgpt-dev-utils/internal/file"
+	"github.com/trknhr/ai-utils/internal/file"
 )
 
 func TestTemplateSelect(t *testing.T) {

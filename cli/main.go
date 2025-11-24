@@ -8,7 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/gorilla/websocket"
-	"github.com/trknhr/chatgpt-dev-utils/internal/ui"
+	"github.com/trknhr/ai-utils/internal/ui"
 )
 
 // WebSocket related variables

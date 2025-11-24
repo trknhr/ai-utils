@@ -4,7 +4,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/trknhr/chatgpt-dev-utils/internal/ui/components"
+	"github.com/trknhr/ai-utils/internal/ui/components"
 )
 
 // Model is the main UI model that orchestrates components

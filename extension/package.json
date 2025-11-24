@@ -1,7 +1,7 @@
 {
-  "name": "chatgpt-dev-utils",
+  "name": "ai-utils",
   "version": "0.0.5",
-  "description": "ChatGPT Dev Utils",
+  "description": "AI Utils",
   "license": "Apache-2.0",
   "author": "Teruo Kunihiro",
   "type": "module",

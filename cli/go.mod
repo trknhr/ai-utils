@@ -1,4 +1,4 @@
-module github.com/trknhr/chatgpt-dev-utils
+module github.com/trknhr/ai-utils
 
 go 1.24.2
 
