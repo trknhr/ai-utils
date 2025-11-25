@@ -3,7 +3,7 @@
 set -e
 
 REPO="trknhr/ai-utils"
-BINARY_NAME="cdev"
+BINARY_NAME="aiu"
 INSTALL_DIR="/usr/local/bin"
 
 # Detect OS and ARCH

@@ -1,19 +1,16 @@
-# 🧠 AI Utils (`cdev`)
+# 🧠 AI Utils (`aiu`)
 
-<p align="center">
-  <img src="img/image.png" alt="AI Utils Icon" width="160" />
-</p>
-
-A developer-friendly CLI tool to send prompts directly to ChatGPT using your Chrome session. Perfect for commit messages, code review, explanations, and more — without using the OpenAI API.
+A developer-friendly CLI tool that manages reusable prompt templates and executes them using locally installed AI CLIs (Claude Code, Gemini CLI, Codex CLI). It automatically detects available AI providers, expands shell commands within templates, and eliminates the need for API keys.
 
 ## ✨ Features
 
-- Send prompts from CLI → Chrome extension → ChatGPT tab
-- Built-in templates: code review, commit messages, documentation
-- Interactive TUI interface powered by [Bubble Tea](https://github.com/charmbracelet/bubbletea)
-- WebSocket-based integration (no OpenAI API key required)
-- File/folder navigation & Git integration
-- Official Chrome extension available on the [Chrome Web Store](https://chromewebstore.google.com/detail/chatgpt-dev-utils-extensi/bdfinimpohfncpgeokmamgfebfhnkebi)
+- **Template Management**: Store reusable prompt templates with Markdown + YAML frontmatter
+- **Dynamic Command Expansion**: Embed shell commands in templates using `{{$ command }}` syntax
+- **Multi-Provider Support**: Automatically detects and uses Claude, Gemini, or Codex CLIs
+- **Cost Optimization**: Uses subscription-based CLIs instead of pay-per-use APIs
+- **No API Keys Required**: Leverages your existing CLI installations
+- **Git Integration**: Built-in support for `git diff`, `git log`, and more
+- **Vendor Agnostic**: Provider fallback system for high availability
 
 ## 📦 Installation (macOS / Linux)
 
@@ -26,96 +23,239 @@ curl -sSfL https://raw.githubusercontent.com/trknhr/ai-utils/main/install.sh | s
 This will:
 - Detect your OS and CPU architecture
 - Download the correct binary
-- Install it to `/usr/local/bin/cdev`
+- Install it to `/usr/local/bin/aiu`
 
 ## 🚀 Quick Start
 
-1. **Install the Chrome Extension** from the [Chrome Web Store](https://chromewebstore.google.com/detail/chatgpt-dev-utils-extensi/bdfinimpohfncpgeokmamgfebfhnkebi)
-2. **Run the CLI tool:**
+### 1. Install a supported AI CLI
+
+You need at least one of these installed:
+
+- **Claude Code**: `npm install -g @anthropic-ai/claude-code`
+- **Gemini CLI**: Follow [Gemini CLI installation](https://github.com/google-gemini/gemini-cli)
+- **Codex CLI**: Follow [Codex installation](https://github.com/openai/codex)
+
+### 2. Initialize configuration
 
 ```bash
-cdev
+# Create config directory and sample prompts
+make dev-setup
+
+# Or manually
+mkdir -p ~/.config/ai-utils/prompts
 ```
 
-The WebSocket server starts automatically to enable Chrome extension integration.
+### 3. Run a prompt
 
-You will be guided through:
+```bash
+# Generate PR description from staged changes
+aiu run pr-desc
 
-1. Choosing prompt type (file / git)
-2. Selecting files or Git templates
-3. Editing prompt if needed
-4. Copying prompt or sending to ChatGPT tab
-
-
-## 🔌 Chrome Extension Setup
-
-### Option 1: Install from Chrome Web Store (Recommended)
-
-Install the official extension from the Chrome Web Store:
-
-👉 **[ChatGPT Dev Utils Extension](https://chromewebstore.google.com/detail/chatgpt-dev-utils-extensi/bdfinimpohfncpgeokmamgfebfhnkebi)**
-
-This is the easiest way to get started - just click "Add to Chrome" and you're ready to go!
-
-### Option 2: Load Unpacked Extension (Development)
-
-For development or if you prefer to load the extension manually:
-
-1. Open `chrome://extensions`
-2. Enable "Developer mode" 
-3. Click "Load unpacked" and select the `extension/` directory
-4. Open `chat.openai.com`
-5. Ensure permissions allow WebSocket access
-
-### Upgrading from Unpacked to Chrome Web Store Version
-
-If you're currently using the unpacked extension:
-
-1. Remove the unpacked extension from `chrome://extensions`
-2. Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/chatgpt-dev-utils-extensi/bdfinimpohfncpgeokmamgfebfhnkebi)
-3. The Chrome Web Store version will automatically update with new features and bug fixes
-
+# Or use the shorthand
+aiu pr-desc
+```
 
 ## 🧠 How It Works
 
 ```
-┌────────────┐        ┌────────────────┐        ┌─────────────┐
-│    cdev    ├──────▶│ Chrome Extension├──────▶│ chat.openai │
-└────────────┘ WebSocket       │ Inject Prompt│
-                               └─────────────┘
+┌─────────────┐    1. Read Template    ┌──────────────────┐
+│ Prompt File │◄──────────────────────│   aiu CLI        │
+│  (*.md)     │                        │                  │
+└─────────────┘                        │  - Parse YAML    │
+                                       │  - Expand {{$}}  │
+┌─────────────┐    2. Execute Commands │  - Detect AI CLI │
+│ Shell       │◄──────────────────────│                  │
+│ (git, etc)  │                        └────────┬─────────┘
+└─────────────┘                                 │
+                                                │ 3. Send Prompt
+                 ┌──────────────────────────────▼─────┐
+                 │  AI Provider (Claude/Gemini/Codex) │
+                 └────────────────────────────────────┘
 ```
 
-No OpenAI API keys. Works by controlling ChatGPT via browser.
+1. **Template Loading**: Reads Markdown files with YAML frontmatter
+2. **Command Expansion**: Executes `{{$ command }}` placeholders and injects output
+3. **Provider Detection**: Automatically selects available AI CLI (Claude → Gemini → Codex)
+4. **Execution**: Sends expanded prompt to the provider and displays response
 
+## 📝 Template System
+
+### Template Format
+
+Templates are Markdown files with optional YAML frontmatter:
+
+```markdown
+---
+name: pr-desc
+description: Generate PR description from staged changes
+requires:
+  - git
+---
+
+Generate a clear and concise PR description based on the following git diff.
+
+## Changes
+\```
+{{$ git diff --cached }}
+\```
+
+## Recent Commit History
+\```
+{{$ git log --oneline -5 }}
+\```
+
+Output format:
+- Title: One-line summary
+- Overview: Purpose and context
+- Details: List of main changes
+```
+
+### Command Syntax
+
+| Syntax | Description | Example |
+|--------|-------------|---------|
+| `{{$ command }}` | Execute shell command and insert output | `{{$ git diff }}` |
+| Future: `{{.Var}}` | Variable substitution | `{{.FilePath}}` |
+| Future: `{{env "VAR"}}` | Environment variable | `{{env "USER"}}` |
+
+### Template Location
+
+Templates are stored in:
+- `~/.config/ai-utils/prompts/` (default)
+- Additional directories via `config.yaml`
+
+List available templates:
+
+```bash
+aiu list  # Coming in Phase 2
+```
+
+## ⚙️ Configuration
+
+Configuration file: `~/.config/ai-utils/config.yaml`
+
+```yaml
+# Prompt directories (searched in order)
+prompt_dirs:
+  - ~/.config/ai-utils/prompts
+  - ~/.local/share/ai-utils/prompts
+
+# Provider priority (tries in order)
+provider_priority:
+  - claude
+  - gemini
+  - codex
+
+# Provider-specific settings
+providers:
+  claude:
+    command: claude
+    args: ["-p", "--output-format", "text"]
+    timeout: 120s
+  gemini:
+    command: gemini
+    args: []
+    timeout: 120s
+  codex:
+    command: codex
+    args: []
+    timeout: 120s
+
+# Defaults
+defaults:
+  timeout: 60s
+  verbose: false
+```
+
+## 💡 Usage Examples
+
+### Generate PR Description
+
+```bash
+# From staged changes
+git add .
+aiu run pr-desc
+```
+
+### Code Review (Coming Soon)
+
+```bash
+# Review staged changes
+aiu run review
+```
+
+### Commit Message (Coming Soon)
+
+```bash
+# Generate commit message
+aiu run commit-msg
+```
+
+### Specify Provider
+
+```bash
+# Use specific provider
+aiu run pr-desc --provider gemini
+
+# Verbose output
+aiu run pr-desc -v
+
+# Dry run (show expanded prompt without executing)
+aiu run pr-desc --dry-run
+```
 
 ## 🛠 Development
 
-To run locally:
+### Build from Source
 
 ```bash
-cd cli
-go run .
+# Clone repository
+git clone https://github.com/trknhr/ai-utils.git
+cd ai-utils
+
+# Build
+make build
+
+# Install locally
+make install
+
+# Run tests
+make test
 ```
 
-To build:
+### Project Structure
 
-```bash
-cd cli
-go build -o cdev
-./cdev
+```
+ai-utils/
+├── cmd/aiu/           # CLI entry point
+├── internal/
+│   ├── cli/           # Command implementations
+│   ├── config/        # Configuration management
+│   ├── provider/      # AI provider implementations
+│   └── template/      # Template parser & executor
+├── prompts/           # Sample templates
+├── go.mod
+├── Makefile
+└── README.md
 ```
 
-Requires Go 1.24+
+### Requirements
 
-## 🧩 Templates Included
+- Go 1.24+
+- At least one supported AI CLI installed
 
-- Code Review (git diff)
-- Commit Message
-- Change Summary
-- File Review
-- Documentation
+## 🧩 Built-in Templates
 
-All templates are editable via TUI.
+- **pr-desc**: Generate PR description from `git diff --cached`
+- More templates coming in future releases
+
+## 🗺️ Roadmap
+
+- [x] **Phase 1 (MVP)**: Basic template system + Claude provider
+- [ ] **Phase 2**: Gemini & Codex providers, `aiu list` command
+- [ ] **Phase 3**: Variable expansion, file includes, environment variables
+- [ ] **Phase 4**: Interactive mode, colored output, better error messages
+- [ ] **Phase 5**: Plugin system, custom providers
 
 ## 📬 Feedback & Contributions
 

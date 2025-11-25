@@ -1,0 +1,33 @@
+# AI Utils Configuration Example
+# Copy this file to ~/.config/ai-utils/config.yaml
+
+# プロンプトディレクトリ（複数指定可）
+prompt_dirs:
+  - ~/.config/ai-utils/prompts
+  - ~/.local/share/ai-utils/prompts
+
+# プロバイダー優先度（上から順に試行）
+provider_priority:
+  - claude
+  - gemini
+  - codex
+
+# プロバイダー別設定
+providers:
+  claude:
+    command: claude
+    args: ["-p", "--output-format", "text"]
+    timeout: 120s
+  gemini:
+    command: gemini
+    args: []
+    timeout: 120s
+  codex:
+    command: codex
+    args: []
+    timeout: 120s
+
+# デフォルト設定
+defaults:
+  timeout: 60s
+  verbose: false
