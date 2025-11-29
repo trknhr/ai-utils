@@ -18,18 +18,23 @@ var (
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run <prompt-name>",
+	Use:   "run <prompt-name> [args...]",
 	Short: "Execute a prompt template",
 	Long: `Execute a prompt template by name.
 
 The template is loaded from configured prompt directories, any {{$ command }}
 placeholders are expanded, and the result is sent to the selected AI provider.
 
+Additional arguments are passed to the template as environment variables:
+  $1, $2, $3... for positional arguments
+  $ARGS for all arguments joined by space
+
 Examples:
   aiu run pr-desc
+  aiu run pr-review develop          # $1=develop, compare with origin/develop
   aiu run commit-msg --provider claude
   aiu run review --dry-run`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MinimumNArgs(1),
 	RunE: runPrompt,
 }
 
@@ -52,19 +57,29 @@ func runPrompt(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Looking for template: %s\n", promptName)
 	}
 
-	templatePath, err := template.FindTemplate(promptName, cfg.PromptDirs)
-	if err != nil {
-		return fmt.Errorf("template not found: %w", err)
-	}
+	var tmpl *template.Template
+	var err error
 
-	if verbose {
-		fmt.Printf("Found template: %s\n", templatePath)
-	}
-
-	// Parse template
-	tmpl, err := template.Parse(templatePath)
-	if err != nil {
-		return fmt.Errorf("failed to parse template: %w", err)
+	// First, try to find in user directories
+	templatePath, findErr := template.FindTemplate(promptName, cfg.PromptDirs)
+	if findErr == nil {
+		if verbose {
+			fmt.Printf("Found template: %s\n", templatePath)
+		}
+		tmpl, err = template.Parse(templatePath)
+		if err != nil {
+			return fmt.Errorf("failed to parse template: %w", err)
+		}
+	} else {
+		// Fallback to builtin templates
+		var ok bool
+		tmpl, ok = template.GetBuiltinTemplate(promptName)
+		if !ok {
+			return fmt.Errorf("template not found: %w", findErr)
+		}
+		if verbose {
+			fmt.Printf("Using builtin template: %s\n", promptName)
+		}
 	}
 
 	if verbose {
@@ -76,18 +91,21 @@ func runPrompt(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("template validation failed: %w", err)
 	}
 
-	// Expand template (execute commands)
-	executor := template.NewExecutor(workingDir, verbose)
+	// Collect template arguments (args after prompt name)
+	templateArgs := args[1:]
 
-	if dryRun {
-		// Just show what would be executed
-		fmt.Println(executor.DryRun(tmpl))
-		return nil
-	}
+	// Expand template (execute commands)
+	executor := template.NewExecutor(workingDir, verbose, templateArgs)
 
 	expandedPrompt, err := executor.Execute(tmpl)
 	if err != nil {
 		return fmt.Errorf("failed to expand template: %w", err)
+	}
+
+	if dryRun {
+		// Show expanded prompt without sending to AI
+		fmt.Println(expandedPrompt)
+		return nil
 	}
 
 	if verbose {

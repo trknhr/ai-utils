@@ -2,6 +2,7 @@ package template
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -14,13 +15,15 @@ var commandPattern = regexp.MustCompile(`\{\{\$\s+([^}]+?)\s*\}\}`)
 type Executor struct {
 	workingDir string
 	verbose    bool
+	args       []string
 }
 
 // NewExecutor creates a new template executor
-func NewExecutor(workingDir string, verbose bool) *Executor {
+func NewExecutor(workingDir string, verbose bool, args []string) *Executor {
 	return &Executor{
 		workingDir: workingDir,
 		verbose:    verbose,
+		args:       args,
 	}
 }
 
@@ -65,12 +68,31 @@ func (e *Executor) executeCommand(command string) (string, error) {
 		cmd.Dir = e.workingDir
 	}
 
+	// Set template arguments as environment variables
+	cmd.Env = e.buildEnv()
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("command failed: %w\nOutput: %s", err, string(output))
 	}
 
 	return strings.TrimSpace(string(output)), nil
+}
+
+// buildEnv creates environment variables for template arguments
+func (e *Executor) buildEnv() []string {
+	// Start with current environment
+	env := os.Environ()
+
+	// Add positional arguments as $1, $2, $3...
+	for i, arg := range e.args {
+		env = append(env, fmt.Sprintf("ARG%d=%s", i+1, arg))
+	}
+
+	// Add all arguments as $ARGS
+	env = append(env, fmt.Sprintf("ARGS=%s", strings.Join(e.args, " ")))
+
+	return env
 }
 
 // DryRun returns the template content without executing commands
