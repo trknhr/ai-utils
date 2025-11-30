@@ -6,11 +6,13 @@ A developer-friendly CLI tool that manages reusable prompt templates and execute
 
 - **Template Management**: Store reusable prompt templates with Markdown + YAML frontmatter
 - **Dynamic Command Expansion**: Embed shell commands in templates using `{{$ command }}` syntax
+- **Template Arguments**: Pass arguments to templates (e.g., `aiu run pr-review feature-branch main`)
+- **Built-in Templates**: PR description, PR review, and commit message templates included in binary
+- **Auto Commit Messages**: Global git hook for AI-powered commit message generation
 - **Multi-Provider Support**: Automatically detects and uses Claude, Gemini, or Codex CLIs
 - **Cost Optimization**: Uses subscription-based CLIs instead of pay-per-use APIs
 - **No API Keys Required**: Leverages your existing CLI installations
 - **Git Integration**: Built-in support for `git diff`, `git log`, and more
-- **Vendor Agnostic**: Provider fallback system for high availability
 
 ## 📦 Installation (macOS / Linux)
 
@@ -35,24 +37,38 @@ You need at least one of these installed:
 - **Gemini CLI**: Follow [Gemini CLI installation](https://github.com/google-gemini/gemini-cli)
 - **Codex CLI**: Follow [Codex installation](https://github.com/openai/codex)
 
-### 2. Initialize configuration
+### 2. Run a prompt
 
 ```bash
-# Create config directory and sample prompts
-make dev-setup
-
-# Or manually
-mkdir -p ~/.config/ai-utils/prompts
-```
-
-### 3. Run a prompt
-
-```bash
-# Generate PR description from staged changes
+# Generate PR description
 aiu run pr-desc
 
-# Or use the shorthand
-aiu pr-desc
+# Review a PR branch (compare feature/xxx with origin/main)
+aiu run pr-review feature/xxx
+
+# Review with custom base branch
+aiu run pr-review feature/xxx develop
+
+# Generate commit message from staged changes
+git add .
+aiu run commit-msg
+```
+
+### 3. Enable auto commit messages (optional)
+
+```bash
+# Enable AI-powered commit messages globally
+aiu enable-auto-commit
+
+# Now just use git commit normally - AI generates the message!
+git add .
+git commit
+
+# Skip AI for a specific commit
+AI_IGNORE=1 git commit
+
+# Disable auto commit
+aiu disable-auto-commit
 ```
 
 ## 🧠 How It Works
@@ -115,20 +131,14 @@ Output format:
 | Syntax | Description | Example |
 |--------|-------------|---------|
 | `{{$ command }}` | Execute shell command and insert output | `{{$ git diff }}` |
-| Future: `{{.Var}}` | Variable substitution | `{{.FilePath}}` |
-| Future: `{{env "VAR"}}` | Environment variable | `{{env "USER"}}` |
+| `$ARG1`, `$ARG2`... | Template arguments (passed from CLI) | `{{$ echo $ARG1 }}` |
+| `$ARGS` | All arguments joined by space | `{{$ echo $ARGS }}` |
 
 ### Template Location
 
-Templates are stored in:
+Built-in templates are embedded in the binary. Custom templates can be stored in:
 - `~/.config/ai-utils/prompts/` (default)
 - Additional directories via `config.yaml`
-
-List available templates:
-
-```bash
-aiu list  # Coming in Phase 2
-```
 
 ## ⚙️ Configuration
 
@@ -172,23 +182,42 @@ defaults:
 ### Generate PR Description
 
 ```bash
-# From staged changes
-git add .
+# From current branch vs origin/main
 aiu run pr-desc
 ```
 
-### Code Review (Coming Soon)
+### PR Code Review
 
 ```bash
-# Review staged changes
-aiu run review
+# Review current branch vs origin/main
+aiu run pr-review
+
+# Review specific branch vs origin/main
+aiu run pr-review feature/new-api
+
+# Review with custom base branch
+aiu run pr-review feature/new-api develop
 ```
 
-### Commit Message (Coming Soon)
+### Generate Commit Message
 
 ```bash
-# Generate commit message
+# Stage changes first
+git add .
+
+# Generate commit message from staged changes
 aiu run commit-msg
+
+# Or use auto-commit hook
+aiu enable-auto-commit
+git commit  # AI generates message automatically
+```
+
+### Dry Run (Preview)
+
+```bash
+# Show expanded prompt without sending to AI
+aiu run pr-review --dry-run
 ```
 
 ### Specify Provider
@@ -227,13 +256,14 @@ make test
 
 ```
 ai-utils/
-├── cmd/aiu/           # CLI entry point
+├── cmd/aiu/              # CLI entry point
 ├── internal/
-│   ├── cli/           # Command implementations
-│   ├── config/        # Configuration management
-│   ├── provider/      # AI provider implementations
-│   └── template/      # Template parser & executor
-├── prompts/           # Sample templates
+│   ├── cli/              # Command implementations
+│   ├── config/           # Configuration management
+│   ├── provider/         # AI provider implementations
+│   └── template/         # Template parser & executor
+│       └── prompts/      # Built-in templates (embedded)
+├── build/                # Build output (gitignored)
 ├── go.mod
 ├── Makefile
 └── README.md
@@ -241,19 +271,32 @@ ai-utils/
 
 ### Requirements
 
-- Go 1.24+
+- Go 1.21+
 - At least one supported AI CLI installed
 
 ## 🧩 Built-in Templates
 
-- **pr-desc**: Generate PR description from `git diff --cached`
-- More templates coming in future releases
+| Template | Description | Usage |
+|----------|-------------|-------|
+| `pr-desc` | Generate PR description from git diff | `aiu run pr-desc` |
+| `pr-review` | Comprehensive code review checklist | `aiu run pr-review [target] [base]` |
+| `commit-msg` | Generate commit message from staged changes | `aiu run commit-msg` |
+
+### pr-review Output
+
+The PR review template generates a detailed review covering:
+- ✅ Code Quality (readability, DRY, complexity)
+- 🔒 Security (input validation, credentials, vulnerabilities)
+- 🧪 Test Coverage (unit tests, edge cases)
+- ⚡ Performance (N+1, memory, optimization)
+- 🔧 Maintainability (docs, error handling, logging)
+- 🏗️ Architecture & Design (separation of concerns, dependencies)
 
 ## 🗺️ Roadmap
 
-- [x] **Phase 1 (MVP)**: Basic template system + Claude provider
-- [ ] **Phase 2**: Gemini & Codex providers, `aiu list` command
-- [ ] **Phase 3**: Variable expansion, file includes, environment variables
+- [x] **Phase 1**: Basic template system + Claude provider
+- [x] **Phase 2**: Built-in templates, template arguments, auto-commit hook
+- [ ] **Phase 3**: Gemini & Codex providers, `aiu list` command
 - [ ] **Phase 4**: Interactive mode, colored output, better error messages
 - [ ] **Phase 5**: Plugin system, custom providers
 
