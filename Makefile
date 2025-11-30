@@ -1,4 +1,5 @@
 APP_NAME := aiu
+BUILD_DIR := build
 BIN_DIR := $(GOPATH)/bin
 MAIN_PATH := ./cmd/aiu
 
@@ -7,7 +8,8 @@ MAIN_PATH := ./cmd/aiu
 all: build
 
 build:
-	go build -o $(APP_NAME) $(MAIN_PATH)
+	@mkdir -p $(BUILD_DIR)
+	go build -o $(BUILD_DIR)/$(APP_NAME) $(MAIN_PATH)
 
 install:
 	go install $(MAIN_PATH)
@@ -16,7 +18,7 @@ run:
 	go run $(MAIN_PATH)
 
 clean:
-	rm -f $(APP_NAME)
+	rm -rf $(BUILD_DIR)
 
 test:
 	go test ./...
