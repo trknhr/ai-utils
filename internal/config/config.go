@@ -51,7 +51,10 @@ func Load() (*Config, error) {
 	if err := v.ReadInConfig(); err != nil {
 		// If config file doesn't exist, use defaults
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return nil, fmt.Errorf("failed to read config: %w", err)
+			// Also check for os.ErrNotExist (file not found)
+			if !os.IsNotExist(err) {
+				return nil, fmt.Errorf("failed to read config: %w", err)
+			}
 		}
 	}
 
