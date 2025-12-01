@@ -55,3 +55,12 @@ func ListBuiltinTemplates() []*Template {
 	}
 	return templates
 }
+
+// ListBuiltinTemplateNames returns all builtin template names
+func ListBuiltinTemplateNames() []string {
+	names := make([]string, 0, len(builtinTemplates))
+	for name := range builtinTemplates {
+		names = append(names, name)
+	}
+	return names
+}

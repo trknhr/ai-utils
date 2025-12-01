@@ -1,9 +1,9 @@
 package provider
 
 import (
-"testing"
+	"testing"
 
-"github.com/trknhr/ai-utils/internal/config"
+	"github.com/trknhr/ai-utils/internal/config"
 )
 
 func TestNewDetector(t *testing.T) {

@@ -1,10 +1,10 @@
 package config
 
 import (
-"os"
-"path/filepath"
-"strings"
-"testing"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
 )
 
 func TestExpandPath_HomeDir(t *testing.T) {

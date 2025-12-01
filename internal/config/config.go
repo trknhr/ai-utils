@@ -12,10 +12,10 @@ import (
 
 // Config represents the application configuration
 type Config struct {
-	PromptDirs       []string                   `mapstructure:"prompt_dirs"`
-	ProviderPriority []string                   `mapstructure:"provider_priority"`
-	Providers        map[string]ProviderConfig  `mapstructure:"providers"`
-	Defaults         DefaultConfig              `mapstructure:"defaults"`
+	PromptDirs       []string                  `mapstructure:"prompt_dirs"`
+	ProviderPriority []string                  `mapstructure:"provider_priority"`
+	Providers        map[string]ProviderConfig `mapstructure:"providers"`
+	Defaults         DefaultConfig             `mapstructure:"defaults"`
 }
 
 // ProviderConfig represents a provider's configuration

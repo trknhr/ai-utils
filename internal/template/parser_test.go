@@ -1,10 +1,10 @@
 package template
 
 import (
-"os"
-"path/filepath"
-"strings"
-"testing"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
 )
 
 func TestParseContent_WithFrontmatter(t *testing.T) {
