@@ -18,18 +18,15 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24
+          go-version-file: 'go.mod'
 
       - name: Build CLI
-        run: |
-          cd cli
-          go build -v -o cdev
+        run: go build -v -o aiu ./cmd/aiu
 
       - name: Run basic tests (build only for now)
         run: |
-          cd cli
           go vet ./...
-          go fmt ./... | tee /dev/stderr
+          go test ./...
 
       - name: Run snapshot release (no tag)
         uses: goreleaser/goreleaser-action@v5

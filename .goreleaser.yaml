@@ -2,8 +2,7 @@ project_name: aiu
 
 builds:
   - id: cli
-    main: ./main.go
-    dir: ./cli
+    main: ./cmd/aiu/main.go
     binary: aiu
     goos:
       - linux
