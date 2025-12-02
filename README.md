@@ -8,11 +8,8 @@ A developer-friendly CLI tool that manages reusable prompt templates and execute
 - **Dynamic Command Expansion**: Embed shell commands in templates using `{{$ command }}` syntax
 - **Template Arguments**: Pass arguments to templates (e.g., `aiu run pr-review feature-branch main`)
 - **Built-in Templates**: PR description, PR review, and commit message templates included in binary
-- **Auto Commit Messages**: Global git hook for AI-powered commit message generation
 - **Multi-Provider Support**: Automatically detects and uses Claude, Gemini, or Codex CLIs
-- **Cost Optimization**: Uses subscription-based CLIs instead of pay-per-use APIs
 - **No API Keys Required**: Leverages your existing CLI installations
-- **Git Integration**: Built-in support for `git diff`, `git log`, and more
 
 ## 📦 Installation (macOS / Linux)
 
