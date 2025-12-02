@@ -6,7 +6,7 @@ A developer-friendly CLI tool that manages reusable prompt templates and execute
 
 - **Template Management**: Store reusable prompt templates with Markdown + YAML frontmatter
 - **Dynamic Command Expansion**: Embed shell commands in templates using `{{$ command }}` syntax
-- **Template Arguments**: Pass arguments to templates (e.g., `aiu run pr-review feature-branch main`)
+- **Template Arguments**: Pass arguments to templates (e.g., `aiu pr-review feature-branch main`)
 - **Built-in Templates**: PR description, PR review, and commit message templates included in binary
 - **Multi-Provider Support**: Automatically detects and uses Claude, Gemini, or Codex CLIs
 - **No API Keys Required**: Leverages your existing CLI installations
@@ -38,17 +38,17 @@ You need at least one of these installed:
 
 ```bash
 # Generate PR description
-aiu run pr-desc
+aiu pr-desc
 
 # Review a PR branch (compare feature/xxx with origin/main)
-aiu run pr-review feature/xxx
+aiu pr-review feature/xxx
 
 # Review with custom base branch
-aiu run pr-review feature/xxx develop
+aiu pr-review feature/xxx develop
 
 # Generate commit message from staged changes
 git add .
-aiu run commit-msg
+aiu commit-msg
 ```
 
 ### 3. Enable auto commit messages (optional)
@@ -180,20 +180,20 @@ defaults:
 
 ```bash
 # From current branch vs origin/main
-aiu run pr-desc
+aiu pr-desc
 ```
 
 ### PR Code Review
 
 ```bash
 # Review current branch vs origin/main
-aiu run pr-review
+aiu pr-review
 
 # Review specific branch vs origin/main
-aiu run pr-review feature/new-api
+aiu pr-review feature/new-api
 
 # Review with custom base branch
-aiu run pr-review feature/new-api develop
+aiu pr-review feature/new-api develop
 ```
 
 ### Generate Commit Message
@@ -203,7 +203,7 @@ aiu run pr-review feature/new-api develop
 git add .
 
 # Generate commit message from staged changes
-aiu run commit-msg
+aiu commit-msg
 
 # Or use auto-commit hook
 aiu enable-auto-commit
@@ -214,20 +214,20 @@ git commit  # AI generates message automatically
 
 ```bash
 # Show expanded prompt without sending to AI
-aiu run pr-review --dry-run
+aiu pr-review --dry-run
 ```
 
 ### Specify Provider
 
 ```bash
 # Use specific provider
-aiu run pr-desc --provider gemini
+aiu pr-desc --provider gemini
 
 # Verbose output
-aiu run pr-desc -v
+aiu pr-desc -v
 
 # Dry run (show expanded prompt without executing)
-aiu run pr-desc --dry-run
+aiu pr-desc --dry-run
 ```
 
 ## 🛠 Development
@@ -275,9 +275,9 @@ ai-utils/
 
 | Template | Description | Usage |
 |----------|-------------|-------|
-| `pr-desc` | Generate PR description from git diff | `aiu run pr-desc` |
-| `pr-review` | Comprehensive code review checklist | `aiu run pr-review [target] [base]` |
-| `commit-msg` | Generate commit message from staged changes | `aiu run commit-msg` |
+| `pr-desc` | Generate PR description from git diff | `aiu pr-desc` |
+| `pr-review` | Comprehensive code review checklist | `aiu pr-review [target] [base]` |
+| `commit-msg` | Generate commit message from staged changes | `aiu commit-msg` |
 
 ### pr-review Output
 
