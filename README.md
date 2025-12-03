@@ -1,8 +1,12 @@
-# 🧠 AI Utils (`aiu`)
+<p align="center">
+  <img src="img/logo.svg" alt="aiu" width="200">
+</p>
+
+<h1 align="center">AI Utils (aiu)</h1>
 
 A developer-friendly CLI tool that manages reusable prompt templates and executes them using locally installed AI CLIs (Claude Code, Gemini CLI, Codex CLI). It automatically detects available AI providers, expands shell commands within templates, and eliminates the need for API keys.
 
-## ✨ Features
+## Features
 
 - **Template Management**: Store reusable prompt templates with Markdown + YAML frontmatter
 - **Dynamic Command Expansion**: Embed shell commands in templates using `{{$ command }}` syntax
@@ -11,7 +15,7 @@ A developer-friendly CLI tool that manages reusable prompt templates and execute
 - **Multi-Provider Support**: Automatically detects and uses Claude, Gemini, or Codex CLIs
 - **No API Keys Required**: Leverages your existing CLI installations
 
-## 📦 Installation (macOS / Linux)
+## Installation (macOS / Linux)
 
 Install the latest release via:
 
@@ -24,7 +28,7 @@ This will:
 - Download the correct binary
 - Install it to `/usr/local/bin/aiu`
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install a supported AI CLI
 
@@ -68,7 +72,7 @@ AI_IGNORE=1 git commit
 aiu disable-auto-commit
 ```
 
-## 🧠 How It Works
+## How It Works
 
 ```
 ┌─────────────┐    1. Read Template    ┌──────────────────┐
@@ -91,7 +95,7 @@ aiu disable-auto-commit
 3. **Provider Detection**: Automatically selects available AI CLI (Claude → Gemini → Codex)
 4. **Execution**: Sends expanded prompt to the provider and displays response
 
-## 📝 Template System
+## Template System
 
 ### Template Format
 
@@ -137,7 +141,7 @@ Built-in templates are embedded in the binary. Custom templates can be stored in
 - `~/.config/ai-utils/prompts/` (default)
 - Additional directories via `config.yaml`
 
-## ⚙️ Configuration
+## Configuration
 
 Configuration file: `~/.config/ai-utils/config.yaml`
 
@@ -174,7 +178,7 @@ defaults:
   verbose: false
 ```
 
-## 💡 Usage Examples
+## Usage Examples
 
 ### Generate PR Description
 
@@ -222,15 +226,9 @@ aiu pr-review --dry-run
 ```bash
 # Use specific provider
 aiu pr-desc --provider gemini
-
-# Verbose output
-aiu pr-desc -v
-
-# Dry run (show expanded prompt without executing)
-aiu pr-desc --dry-run
 ```
 
-## 🛠 Development
+## Development
 
 ### Build from Source
 
@@ -271,7 +269,7 @@ ai-utils/
 - Go 1.21+
 - At least one supported AI CLI installed
 
-## 🧩 Built-in Templates
+## Built-in Templates
 
 | Template | Description | Usage |
 |----------|-------------|-------|
@@ -282,14 +280,14 @@ ai-utils/
 ### pr-review Output
 
 The PR review template generates a detailed review covering:
-- ✅ Code Quality (readability, DRY, complexity)
-- 🔒 Security (input validation, credentials, vulnerabilities)
-- 🧪 Test Coverage (unit tests, edge cases)
-- ⚡ Performance (N+1, memory, optimization)
-- 🔧 Maintainability (docs, error handling, logging)
-- 🏗️ Architecture & Design (separation of concerns, dependencies)
+- Code Quality (readability, DRY, complexity)
+- Security (input validation, credentials, vulnerabilities)
+- Test Coverage (unit tests, edge cases)
+- Performance (N+1, memory, optimization)
+- Maintainability (docs, error handling, logging)
+- Architecture & Design (separation of concerns, dependencies)
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [x] **Phase 1**: Basic template system + Claude provider
 - [x] **Phase 2**: Built-in templates, template arguments, auto-commit hook
@@ -297,10 +295,10 @@ The PR review template generates a detailed review covering:
 - [ ] **Phase 4**: Interactive mode, colored output, better error messages
 - [ ] **Phase 5**: Plugin system, custom providers
 
-## 📬 Feedback & Contributions
+## Feedback & Contributions
 
 PRs and issues welcome → [github.com/trknhr/ai-utils](https://github.com/trknhr/ai-utils)
 
-## 📄 License
+## License
 
 Apache 2.0 License — © 2025 Teruo Kunihiro

@@ -9,6 +9,7 @@ import (
 	"github.com/trknhr/ai-utils/internal/config"
 	"github.com/trknhr/ai-utils/internal/provider"
 	"github.com/trknhr/ai-utils/internal/template"
+	"github.com/trknhr/ai-utils/internal/ui"
 )
 
 var (
@@ -157,13 +158,17 @@ func executeTemplate(cmd *cobra.Command, promptName string, args []string) error
 		Verbose:    verbose,
 	}
 
-	fmt.Fprintf(os.Stderr, "Executing with %s...\n", prov.Name())
+	// Start spinner animation
+	spinner := ui.NewSpinner(fmt.Sprintf("Executing with %s...", prov.Name()))
+	spinner.Start()
 
 	result, err := prov.Execute(ctx, expandedPrompt, opts)
 	if err != nil {
+		spinner.StopWithError("Execution failed")
 		return fmt.Errorf("execution failed: %w", err)
 	}
 
+	spinner.StopWithMessage("Done!")
 	fmt.Println(result)
 
 	return nil
