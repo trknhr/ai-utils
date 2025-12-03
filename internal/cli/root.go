@@ -190,6 +190,16 @@ func initConfig() {
 					Args:    []string{"-p", "--output-format", "text"},
 					Timeout: 120,
 				},
+				"gemini": {
+					Command: "gemini",
+					Args:    []string{},
+					Timeout: 120,
+				},
+				"codex": {
+					Command: "codex",
+					Args:    []string{},
+					Timeout: 120,
+				},
 			},
 		}
 	}

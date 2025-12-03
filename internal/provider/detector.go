@@ -24,7 +24,13 @@ func NewDetector(cfg *config.Config) *Detector {
 		d.providers["claude"] = NewClaudeProvider(&claudeCfg)
 	}
 
-	// TODO: Add gemini and codex providers in Phase 2
+	if geminiCfg, ok := cfg.Providers["gemini"]; ok {
+		d.providers["gemini"] = NewGeminiProvider(&geminiCfg)
+	}
+
+	if codexCfg, ok := cfg.Providers["codex"]; ok {
+		d.providers["codex"] = NewCodexProvider(&codexCfg)
+	}
 
 	return d
 }

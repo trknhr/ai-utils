@@ -34,7 +34,7 @@ This will:
 
 You need at least one of these installed:
 
-- **Claude Code**: `npm install -g @anthropic-ai/claude-code`
+- **Claude Code**: Follow [ClaudeCode installation](https://github.com/anthropics/claude-code)
 - **Gemini CLI**: Follow [Gemini CLI installation](https://github.com/google-gemini/gemini-cli)
 - **Codex CLI**: Follow [Codex installation](https://github.com/openai/codex)
 
