@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -46,8 +47,20 @@ func (p *CodexProvider) Execute(ctx context.Context, prompt string, opts Execute
 	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 	defer cancel()
 
-	// Codex CLI passes prompt as argument
-	args := append(p.args, prompt)
+	// Create a temp file to capture the output
+	tmpFile, err := os.CreateTemp("", "codex-output-*.txt")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp file: %w", err)
+	}
+	tmpPath := tmpFile.Name()
+	tmpFile.Close()
+	defer os.Remove(tmpPath)
+
+	// Codex CLI uses "exec" subcommand for non-interactive mode
+	// Use -o to output only the last message to a file
+	args := []string{"exec", "-o", tmpPath}
+	args = append(args, p.args...)
+	args = append(args, prompt)
 
 	if opts.Verbose {
 		fmt.Printf("Executing: %s %s\n", p.command, strings.Join(args, " "))
@@ -58,9 +71,15 @@ func (p *CodexProvider) Execute(ctx context.Context, prompt string, opts Execute
 		cmd.Dir = opts.WorkingDir
 	}
 
-	output, err := cmd.CombinedOutput()
+	// Run command, ignore stdout/stderr (session info goes there)
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("codex execution failed: %w", err)
+	}
+
+	// Read the output from the temp file
+	output, err := os.ReadFile(tmpPath)
 	if err != nil {
-		return "", fmt.Errorf("codex execution failed: %w\nOutput: %s", err, string(output))
+		return "", fmt.Errorf("failed to read codex output: %w", err)
 	}
 
 	return strings.TrimSpace(string(output)), nil
