@@ -31,6 +31,7 @@ func init() {
 
 	runCmd.Flags().Bool("dry-run", false, "show expanded prompt without executing")
 	runCmd.Flags().Duration("timeout", 0, "execution timeout (default: from config)")
+	runCmd.Flags().BoolP("parallel", "p", false, "run available providers in parallel and choose the output")
 }
 
 func runPrompt(cmd *cobra.Command, args []string) error {

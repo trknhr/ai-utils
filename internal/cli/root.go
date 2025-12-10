@@ -1,15 +1,15 @@
 package cli
 
 import (
-	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/trknhr/ai-utils/internal/config"
 	"github.com/trknhr/ai-utils/internal/provider"
+	"github.com/trknhr/ai-utils/internal/runner"
 	"github.com/trknhr/ai-utils/internal/template"
-	"github.com/trknhr/ai-utils/internal/ui"
 )
 
 var (
@@ -62,6 +62,7 @@ func registerTemplateCommands() {
 		}
 		cmd.Flags().Bool("dry-run", false, "show expanded prompt without executing")
 		cmd.Flags().Duration("timeout", 0, "execution timeout (default: from config)")
+		cmd.Flags().BoolP("parallel", "p", false, "run available providers in parallel and choose the output")
 		rootCmd.AddCommand(cmd)
 	}
 }
@@ -73,6 +74,7 @@ func executeTemplate(cmd *cobra.Command, promptName string, args []string) error
 	workingDir, _ := cmd.Flags().GetString("working-dir")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
 	timeout, _ := cmd.Flags().GetDuration("timeout")
+	parallel, _ := cmd.Flags().GetBool("parallel")
 
 	// Find template
 	if verbose {
@@ -130,48 +132,80 @@ func executeTemplate(cmd *cobra.Command, promptName string, args []string) error
 		fmt.Printf("\n=== Expanded Prompt ===\n%s\n\n", expandedPrompt)
 	}
 
-	// Select provider
-	var prov provider.Provider
-	if providerName != "" {
-		prov, err = detector.GetProvider(providerName)
-		if err != nil {
-			return fmt.Errorf("failed to get provider: %w", err)
-		}
-		if verbose {
-			fmt.Printf("Using specified provider: %s\n", providerName)
-		}
-	} else {
-		prov, err = detector.GetFirstAvailable()
-		if err != nil {
-			return fmt.Errorf("no available providers: %w\n\nPlease install one of: claude, gemini, codex", err)
-		}
-		if verbose {
-			fmt.Printf("Using auto-detected provider: %s\n", prov.Name())
-		}
+	// Select providers
+	providers, err := resolveProviders(parallel, providerName, verbose)
+	if err != nil {
+		return err
 	}
 
-	// Execute with provider
-	ctx := context.Background()
-	opts := provider.ExecuteOptions{
+	// Execute with runner
+	result, err := runner.Run(cmd.Context(), runner.ExecuteOptions{
+		Parallel:   parallel,
+		Prompt:     expandedPrompt,
+		Providers:  providers,
 		Timeout:    timeout,
 		WorkingDir: workingDir,
 		Verbose:    verbose,
-	}
-
-	// Start spinner animation
-	spinner := ui.NewSpinner(fmt.Sprintf("Executing with %s...", prov.Name()))
-	spinner.Start()
-
-	result, err := prov.Execute(ctx, expandedPrompt, opts)
+	})
 	if err != nil {
-		spinner.StopWithError("Execution failed")
 		return fmt.Errorf("execution failed: %w", err)
 	}
 
-	spinner.StopWithMessage("Done!")
 	fmt.Println(result)
 
 	return nil
+}
+
+func resolveProviders(parallel bool, providerName string, verbose bool) ([]provider.Provider, error) {
+	if providerName != "" {
+		prov, err := detector.GetProvider(providerName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get provider: %w", err)
+		}
+		if verbose {
+			fmt.Fprintf(os.Stderr, "Using specified provider: %s\n", providerName)
+		}
+		return []provider.Provider{prov}, nil
+	}
+
+	if parallel {
+		availableNames := detector.DetectAvailable()
+		if len(availableNames) == 0 {
+			return nil, fmt.Errorf("no available providers\n\nPlease install one of: claude, gemini, codex")
+		}
+
+		providers := make([]provider.Provider, 0, len(availableNames))
+		for _, name := range availableNames {
+			prov, err := detector.GetProvider(name)
+			if err != nil {
+				continue
+			}
+			providers = append(providers, prov)
+		}
+
+		if len(providers) == 0 {
+			return nil, fmt.Errorf("no available providers\n\nPlease install one of: claude, gemini, codex")
+		}
+
+		if verbose {
+			names := make([]string, 0, len(providers))
+			for _, prov := range providers {
+				names = append(names, prov.Name())
+			}
+			fmt.Fprintf(os.Stderr, "Running in parallel with: %s\n", strings.Join(names, ", "))
+		}
+
+		return providers, nil
+	}
+
+	prov, err := detector.GetFirstAvailable()
+	if err != nil {
+		return nil, fmt.Errorf("no available providers: %w\n\nPlease install one of: claude, gemini, codex", err)
+	}
+	if verbose {
+		fmt.Fprintf(os.Stderr, "Using auto-detected provider: %s\n", prov.Name())
+	}
+	return []provider.Provider{prov}, nil
 }
 
 // initConfig reads in config file and ENV variables if set.

@@ -59,9 +59,23 @@ func (p *GeminiProvider) Execute(ctx context.Context, prompt string, opts Execut
 	}
 
 	output, err := cmd.CombinedOutput()
+	clean := filterGeminiNoise(string(output))
 	if err != nil {
-		return "", fmt.Errorf("gemini execution failed: %w\nOutput: %s", err, string(output))
+		return "", fmt.Errorf("gemini execution failed: %w\nOutput: %s", err, clean)
 	}
 
-	return strings.TrimSpace(string(output)), nil
+	return strings.TrimSpace(clean), nil
+}
+
+// filterGeminiNoise removes IDEClient warnings the user cannot act on here.
+func filterGeminiNoise(out string) string {
+	lines := strings.Split(out, "\n")
+	filtered := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if strings.Contains(line, "[ERROR] [IDEClient]") {
+			continue
+		}
+		filtered = append(filtered, line)
+	}
+	return strings.Join(filtered, "\n")
 }

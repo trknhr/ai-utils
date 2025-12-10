@@ -37,16 +37,12 @@ You are an experienced code reviewer. Review the following code changes and prov
 {{$ TARGET=$(if [ -n "$ARG1" ]; then echo "origin/$ARG1"; else echo "HEAD"; fi); BASE=$(if [ -n "$ARG2" ]; then echo "origin/$ARG2"; else git rev-parse --verify origin/main >/dev/null 2>&1 && echo "origin/main" || (git rev-parse --verify origin/master >/dev/null 2>&1 && echo "origin/master" || echo "main"); fi); git diff --name-only "$BASE"..."$TARGET" 2>/dev/null || git diff --name-only "$BASE".."$TARGET" 2>/dev/null || git diff --name-only "$BASE" }}
 ```
 
----
-
 ## Review Guidelines
 
 Analyze the code changes and provide feedback on each of the following perspectives. For each category, provide:
 1. **Status**: ✅ No Issues | ⚠️ Needs Improvement | ❌ Needs Fix
 2. **Checklist**: Specific items checked with `- [x]` (passed) or `- [ ]` (failed/needs attention)
 3. **Comments**: Detailed explanation if issues are found
-
----
 
 ## Output Format
 
@@ -65,8 +61,6 @@ Analyze the code changes and provide feedback on each of the following perspecti
 #### Comments
 [Provide specific feedback with file names and line references if applicable]
 
----
-
 ### 2. Security
 **Status**: [✅ No Issues | ⚠️ Needs Improvement | ❌ Needs Fix]
 
@@ -83,8 +77,6 @@ Analyze the code changes and provide feedback on each of the following perspecti
 #### Comments
 [Provide specific security concerns with severity level if found]
 
----
-
 ### 3. Test Coverage
 **Status**: [✅ No Issues | ⚠️ Needs Improvement | ❌ Needs Fix]
 
@@ -99,8 +91,6 @@ Analyze the code changes and provide feedback on each of the following perspecti
 
 #### Comments
 [Suggest specific test cases that should be added if missing]
-
----
 
 ### 4. Performance
 **Status**: [✅ No Issues | ⚠️ Needs Improvement | ❌ Needs Fix]
@@ -117,8 +107,6 @@ Analyze the code changes and provide feedback on each of the following perspecti
 #### Comments
 [Identify performance bottlenecks with specific recommendations]
 
----
-
 ### 5. Maintainability
 **Status**: [✅ No Issues | ⚠️ Needs Improvement | ❌ Needs Fix]
 
@@ -134,8 +122,6 @@ Analyze the code changes and provide feedback on each of the following perspecti
 #### Comments
 [Suggest improvements for long-term maintainability]
 
----
-
 ### 6. Architecture & Design
 **Status**: [✅ No Issues | ⚠️ Needs Improvement | ❌ Needs Fix]
 
@@ -150,8 +136,6 @@ Analyze the code changes and provide feedback on each of the following perspecti
 #### Comments
 [Provide architectural feedback and suggestions]
 
----
-
 ## Summary
 
 ### Overall Assessment
@@ -165,7 +149,5 @@ Analyze the code changes and provide feedback on each of the following perspecti
 
 ### Positive Highlights
 [Mention any particularly good practices or improvements observed]
-
----
 
 IMPORTANT: Output the review directly without any introductory phrases like "Here's the review" or "Based on the changes". Start with "### 1. Code Quality" section. Check the boxes `[x]` for items that pass and leave unchecked `[ ]` for items that need attention. Be specific and constructive in your feedback.
