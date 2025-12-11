@@ -6,6 +6,9 @@ prompt_dirs:
   - ~/.config/ai-utils/prompts
   - ~/.local/share/ai-utils/prompts
 
+# デフォルトの出力言語 (例: en, ja, French)
+output_lang: en
+
 # プロバイダー優先度（上から順に試行）
 provider_priority:
   - claude

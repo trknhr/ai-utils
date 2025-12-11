@@ -42,6 +42,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().StringP("provider", "P", "", "specify provider (claude, gemini, codex)")
 	rootCmd.PersistentFlags().StringP("working-dir", "w", ".", "working directory for command execution")
+	rootCmd.PersistentFlags().String("lang", "", "output language (overrides config output_lang)")
 
 	// Register template commands at init time (so they show in --help)
 	registerTemplateCommands()
@@ -75,6 +76,7 @@ func executeTemplate(cmd *cobra.Command, promptName string, args []string) error
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
 	timeout, _ := cmd.Flags().GetDuration("timeout")
 	parallel, _ := cmd.Flags().GetBool("parallel")
+	langFlag, _ := cmd.Flags().GetString("lang")
 
 	// Find template
 	if verbose {
@@ -122,6 +124,8 @@ func executeTemplate(cmd *cobra.Command, promptName string, args []string) error
 	if err != nil {
 		return fmt.Errorf("failed to expand template: %w", err)
 	}
+
+	expandedPrompt = appendLanguageHint(expandedPrompt, langFlag, cfg.OutputLang)
 
 	if dryRun {
 		fmt.Println(expandedPrompt)
@@ -206,6 +210,23 @@ func resolveProviders(parallel bool, providerName string, verbose bool) ([]provi
 		fmt.Fprintf(os.Stderr, "Using auto-detected provider: %s\n", prov.Name())
 	}
 	return []provider.Provider{prov}, nil
+}
+
+func appendLanguageHint(prompt string, flagLang string, configLang string) string {
+	lang := strings.TrimSpace(flagLang)
+	if lang == "" {
+		lang = strings.TrimSpace(configLang)
+	}
+	if lang == "" {
+		return prompt
+	}
+
+	var sb strings.Builder
+	sb.WriteString(strings.TrimSpace(prompt))
+	sb.WriteString("\n\nPlease respond in ")
+	sb.WriteString(lang)
+	sb.WriteString(".")
+	return sb.String()
 }
 
 // initConfig reads in config file and ENV variables if set.

@@ -104,6 +104,10 @@ func TestLoad_DefaultConfig(t *testing.T) {
 	if cfg.Providers == nil || len(cfg.Providers) == 0 {
 		t.Error("expected providers to have defaults")
 	}
+
+	if cfg.OutputLang == "" {
+		t.Error("expected output_lang to have default")
+	}
 }
 
 func TestLoad_PromptDirsDefault(t *testing.T) {

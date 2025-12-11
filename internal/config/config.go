@@ -16,6 +16,7 @@ type Config struct {
 	ProviderPriority []string                  `mapstructure:"provider_priority"`
 	Providers        map[string]ProviderConfig `mapstructure:"providers"`
 	Defaults         DefaultConfig             `mapstructure:"defaults"`
+	OutputLang       string                    `mapstructure:"output_lang"`
 }
 
 // ProviderConfig represents a provider's configuration
@@ -77,6 +78,11 @@ func Load() (*Config, error) {
 		}
 	}
 
+	// If output_lang is empty, use default
+	if cfg.OutputLang == "" {
+		cfg.OutputLang = v.GetString("output_lang")
+	}
+
 	return &cfg, nil
 }
 
@@ -102,6 +108,7 @@ func setDefaults(v *viper.Viper) {
 
 	v.SetDefault("prompt_dirs", []string{promptsDir})
 	v.SetDefault("provider_priority", []string{"claude", "gemini", "codex"})
+	v.SetDefault("output_lang", "en")
 
 	// Claude defaults
 	v.SetDefault("providers.claude.command", "claude")
