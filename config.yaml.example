@@ -16,7 +16,12 @@ provider_priority:
 providers:
   claude:
     command: claude
-    args: ["-p", "--output-format", "text"]
+    args:
+      - "-p"
+      - "--output-format"
+      - "text"
+      - "--settings"
+      - "{\"attribution\":{\"commit\":\"\",\"pr\":\"\"},\"includeCoAuthoredBy\":false,\"gitAttribution\":false}"
     timeout: 120s
   gemini:
     command: gemini

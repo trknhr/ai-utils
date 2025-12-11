@@ -221,7 +221,11 @@ func initConfig() {
 			Providers: map[string]config.ProviderConfig{
 				"claude": {
 					Command: "claude",
-					Args:    []string{"-p", "--output-format", "text"},
+					Args: []string{
+						"-p",
+						"--output-format", "text",
+						"--settings", `{"attribution":{"commit":"","pr":""},"includeCoAuthoredBy":false,"gitAttribution":false}`,
+					},
 					Timeout: 120,
 				},
 				"gemini": {

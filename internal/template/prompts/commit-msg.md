@@ -22,7 +22,6 @@ You are an expert at writing clear and concise git commit messages following bes
 {{$ git log --oneline -5 }}
 ```
 
----
 
 ## Guidelines
 
@@ -58,8 +57,6 @@ The area of the codebase affected (e.g., `auth`, `api`, `ui`, `config`)
 - Explain what and why, not how
 - Wrap at 72 characters
 - Use bullet points if needed
-
----
 
 ## Output Format
 

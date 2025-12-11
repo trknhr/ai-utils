@@ -105,7 +105,11 @@ func setDefaults(v *viper.Viper) {
 
 	// Claude defaults
 	v.SetDefault("providers.claude.command", "claude")
-	v.SetDefault("providers.claude.args", []string{})
+	v.SetDefault("providers.claude.args", []string{
+		"-p",
+		"--output-format", "text",
+		"--settings", `{"attribution":{"commit":"","pr":""},"includeCoAuthoredBy":false,"gitAttribution":false}`,
+	})
 	v.SetDefault("providers.claude.timeout", 120*time.Second)
 
 	// Gemini defaults
