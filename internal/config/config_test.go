@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
@@ -52,8 +51,8 @@ func TestGetConfigDir(t *testing.T) {
 		t.Error("GetConfigDir returned empty string")
 	}
 
-	if !strings.Contains(dir, "ai-utils") {
-		t.Errorf("expected path to contain 'ai-utils', got '%s'", dir)
+	if filepath.Base(dir) != ".aiu" {
+		t.Errorf("expected global config dir base to be '.aiu', got '%s'", dir)
 	}
 }
 
@@ -84,6 +83,26 @@ func TestGetPromptsDir(t *testing.T) {
 
 	if filepath.Base(dir) != "prompts" {
 		t.Errorf("expected path to end with 'prompts', got '%s'", dir)
+	}
+}
+
+func TestGetWorkspaceConfigDir_Default(t *testing.T) {
+	tmp := t.TempDir()
+	origWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd failed: %v", err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(origWD) })
+	if err := os.Chdir(tmp); err != nil {
+		t.Fatalf("Chdir failed: %v", err)
+	}
+
+	dir, err := GetWorkspaceConfigDir()
+	if err != nil {
+		t.Fatalf("GetWorkspaceConfigDir failed: %v", err)
+	}
+	if filepath.Base(dir) != ".aiu" {
+		t.Fatalf("expected workspace config dir base '.aiu', got: %q", dir)
 	}
 }
 
@@ -118,5 +137,54 @@ func TestLoad_PromptDirsDefault(t *testing.T) {
 
 	if len(cfg.PromptDirs) == 0 {
 		t.Error("expected prompt_dirs to have default value")
+	}
+}
+
+func TestLoad_WorkspaceOverridesGlobal(t *testing.T) {
+	tmpHome := t.TempDir()
+	tmpWorkspace := t.TempDir()
+	workspaceAiuDir := filepath.Join(tmpWorkspace, ".aiu")
+	if err := os.MkdirAll(workspaceAiuDir, 0755); err != nil {
+		t.Fatalf("MkdirAll workspace .aiu failed: %v", err)
+	}
+
+	origHome := os.Getenv("HOME")
+	origWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd failed: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = os.Setenv("HOME", origHome)
+		_ = os.Chdir(origWD)
+	})
+	if err := os.Setenv("HOME", tmpHome); err != nil {
+		t.Fatalf("Setenv HOME failed: %v", err)
+	}
+
+	globalAiuDir := filepath.Join(tmpHome, ".aiu")
+	if err := os.MkdirAll(globalAiuDir, 0755); err != nil {
+		t.Fatalf("MkdirAll global .aiu failed: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(globalAiuDir, "config.yaml"), []byte("output_lang: en\n"), 0644); err != nil {
+		t.Fatalf("WriteFile global config failed: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(workspaceAiuDir, "config.yaml"), []byte("output_lang: ja\n"), 0644); err != nil {
+		t.Fatalf("WriteFile workspace config failed: %v", err)
+	}
+
+	subdir := filepath.Join(tmpWorkspace, "subdir")
+	if err := os.MkdirAll(subdir, 0755); err != nil {
+		t.Fatalf("MkdirAll subdir failed: %v", err)
+	}
+	if err := os.Chdir(subdir); err != nil {
+		t.Fatalf("Chdir failed: %v", err)
+	}
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load failed: %v", err)
+	}
+	if cfg.OutputLang != "ja" {
+		t.Fatalf("expected workspace config to override output_lang to 'ja', got: %q", cfg.OutputLang)
 	}
 }

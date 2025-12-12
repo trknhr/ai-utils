@@ -1,10 +1,16 @@
 # AI Utils Configuration Example
-# Copy this file to ~/.config/ai-utils/config.yaml
+# Copy this file to:
+#   - ~/.aiu/config.yaml (global)
+#   - <workspace>/.aiu/config.yaml (workspace; overrides global)
 
 # プロンプトディレクトリ（複数指定可）
-prompt_dirs:
-  - ~/.config/ai-utils/prompts
-  - ~/.local/share/ai-utils/prompts
+# デフォルトは以下（workspace が global より優先）:
+#   - <workspace>/.aiu/prompts
+#   - ~/.aiu/prompts
+#
+#prompt_dirs:
+#  - ~/.aiu/prompts
+#  - ~/.local/share/ai-utils/prompts
 
 # デフォルトの出力言語 (例: en, ja, French)
 output_lang: en

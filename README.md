@@ -138,17 +138,21 @@ Output format:
 ### Template Location
 
 Built-in templates are embedded in the binary. Custom templates can be stored in:
-- `~/.config/ai-utils/prompts/` (default)
-- Additional directories via `config.yaml`
+- `<workspace>/.aiu/prompts/` (overrides global; searched first)
+- `~/.aiu/prompts/` (global)
+- Additional directories via `config.yaml` (`prompt_dirs`)
 
 ## Configuration
 
-Configuration file: `~/.config/ai-utils/config.yaml`
+Configuration files (merged in this order; workspace overrides global):
+- `~/.aiu/config.yaml`
+- `<workspace>/.aiu/config.yaml`
 
 ```yaml
 # Prompt directories (searched in order)
 prompt_dirs:
-  - ~/.config/ai-utils/prompts
+  - <workspace>/.aiu/prompts
+  - ~/.aiu/prompts
   - ~/.local/share/ai-utils/prompts
 
 # Provider priority (tries in order)

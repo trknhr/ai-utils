@@ -36,27 +36,38 @@ type DefaultConfig struct {
 func Load() (*Config, error) {
 	v := viper.New()
 
-	// Set config file path
-	configPath, err := GetConfigPath()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get config path: %w", err)
-	}
-
-	v.SetConfigFile(configPath)
 	v.SetConfigType("yaml")
 
 	// Set defaults
 	setDefaults(v)
 
-	// Read config file if it exists
+	// Layered config:
+	//  1) Global config: ~/.aiu/config.yaml
+	//  2) Workspace config: <workspace>/.aiu/config.yaml (overrides global)
+	globalConfigPath, err := GetConfigPath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get global config path: %w", err)
+	}
+	v.SetConfigFile(globalConfigPath)
 	if err := v.ReadInConfig(); err != nil {
-		// If config file doesn't exist, use defaults
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			// Also check for os.ErrNotExist (file not found)
-			if !os.IsNotExist(err) {
-				return nil, fmt.Errorf("failed to read config: %w", err)
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok && !os.IsNotExist(err) {
+			return nil, fmt.Errorf("failed to read global config: %w", err)
+		}
+	}
+
+	workspaceConfigPath, err := GetWorkspaceConfigPath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get workspace config path: %w", err)
+	}
+	if _, statErr := os.Stat(workspaceConfigPath); statErr == nil {
+		v.SetConfigFile(workspaceConfigPath)
+		if err := v.MergeInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok && !os.IsNotExist(err) {
+				return nil, fmt.Errorf("failed to read workspace config: %w", err)
 			}
 		}
+	} else if statErr != nil && !os.IsNotExist(statErr) {
+		return nil, fmt.Errorf("failed to stat workspace config: %w", statErr)
 	}
 
 	var cfg Config
@@ -66,11 +77,7 @@ func Load() (*Config, error) {
 
 	// If prompt_dirs is empty, use default
 	if len(cfg.PromptDirs) == 0 {
-		promptsDir, err := GetPromptsDir()
-		if err != nil {
-			return nil, err
-		}
-		cfg.PromptDirs = []string{promptsDir}
+		cfg.PromptDirs = v.GetStringSlice("prompt_dirs")
 	} else {
 		// Expand ~ and environment variables in prompt_dirs
 		for i, dir := range cfg.PromptDirs {
@@ -104,9 +111,16 @@ func expandPath(path string) string {
 
 // setDefaults sets default configuration values
 func setDefaults(v *viper.Viper) {
-	promptsDir, _ := GetPromptsDir()
-
-	v.SetDefault("prompt_dirs", []string{promptsDir})
+	workspacePromptsDir, _ := GetWorkspacePromptsDir()
+	globalPromptsDir, _ := GetPromptsDir()
+	var promptDirs []string
+	if strings.TrimSpace(workspacePromptsDir) != "" {
+		promptDirs = append(promptDirs, workspacePromptsDir)
+	}
+	if strings.TrimSpace(globalPromptsDir) != "" {
+		promptDirs = append(promptDirs, globalPromptsDir)
+	}
+	v.SetDefault("prompt_dirs", promptDirs)
 	v.SetDefault("provider_priority", []string{"claude", "gemini", "codex"})
 	v.SetDefault("output_lang", "en")
 
