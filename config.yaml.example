@@ -20,6 +20,7 @@ provider_priority:
   - claude
   - gemini
   - codex
+  - copilot
 
 # プロバイダー別設定
 providers:
@@ -39,6 +40,13 @@ providers:
   codex:
     command: codex
     args: []
+    model: ""
+    timeout: 120s
+  copilot:
+    command: copilot
+    args:
+      - "-s"
+    model: ""
     timeout: 120s
 
 # デフォルト設定

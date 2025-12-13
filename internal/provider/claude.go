@@ -28,7 +28,7 @@ func NewClaudeProvider(cfg *config.ProviderConfig) *ClaudeProvider {
 
 // Name returns the provider identifier
 func (p *ClaudeProvider) Name() string {
-	return "claude"
+	return ProviderClaude
 }
 
 // Available checks if the Claude CLI is installed

@@ -20,16 +20,20 @@ func NewDetector(cfg *config.Config) *Detector {
 	}
 
 	// Register providers
-	if claudeCfg, ok := cfg.Providers["claude"]; ok {
-		d.providers["claude"] = NewClaudeProvider(&claudeCfg)
+	if claudeCfg, ok := cfg.Providers[ProviderClaude]; ok {
+		d.providers[ProviderClaude] = NewClaudeProvider(&claudeCfg)
 	}
 
-	if geminiCfg, ok := cfg.Providers["gemini"]; ok {
-		d.providers["gemini"] = NewGeminiProvider(&geminiCfg)
+	if geminiCfg, ok := cfg.Providers[ProviderGemini]; ok {
+		d.providers[ProviderGemini] = NewGeminiProvider(&geminiCfg)
 	}
 
-	if codexCfg, ok := cfg.Providers["codex"]; ok {
-		d.providers["codex"] = NewCodexProvider(&codexCfg)
+	if codexCfg, ok := cfg.Providers[ProviderCodex]; ok {
+		d.providers[ProviderCodex] = NewCodexProvider(&codexCfg)
+	}
+
+	if copilotCfg, ok := cfg.Providers[ProviderCopilot]; ok {
+		d.providers[ProviderCopilot] = NewCopilotProvider(&copilotCfg)
 	}
 
 	return d

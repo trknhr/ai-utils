@@ -28,7 +28,7 @@ func NewGeminiProvider(cfg *config.ProviderConfig) *GeminiProvider {
 
 // Name returns the provider identifier
 func (p *GeminiProvider) Name() string {
-	return "gemini"
+	return ProviderGemini
 }
 
 // Available checks if the Gemini CLI is installed

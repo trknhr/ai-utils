@@ -22,6 +22,7 @@ type ExecuteOptions struct {
 	Timeout    time.Duration
 	WorkingDir string
 	Verbose    bool
+	Model      string
 }
 
 // ProviderInfo contains information about a provider

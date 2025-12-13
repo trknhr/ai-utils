@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/trknhr/ai-utils/internal/config"
@@ -22,7 +23,7 @@ var rootCmd = &cobra.Command{
 	Use:   "aiu",
 	Short: "AI Utils - Execute prompts with local AI CLIs",
 	Long: `AI Utils (aiu) is a command-line tool that manages prompt templates
-and executes them using locally installed AI CLIs (claude, gemini, codex).
+and executes them using locally installed AI CLIs (claude, gemini, codex, copilot).
 
 It automatically detects available AI CLIs and uses them according to
 your configured priority, eliminating the need for API keys.`,
@@ -40,9 +41,10 @@ func init() {
 
 	// Global flags
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
-	rootCmd.PersistentFlags().StringP("provider", "P", "", "specify provider (claude, gemini, codex)")
+	rootCmd.PersistentFlags().StringP("provider", "P", "", "specify provider (claude, gemini, codex, copilot)")
 	rootCmd.PersistentFlags().StringP("working-dir", "w", ".", "working directory for command execution")
 	rootCmd.PersistentFlags().String("lang", "", "output language (overrides config output_lang)")
+	rootCmd.PersistentFlags().String("model", "", "model name (overrides provider config where supported)")
 
 	// Register template commands at init time (so they show in --help)
 	registerTemplateCommands()
@@ -77,6 +79,7 @@ func executeTemplate(cmd *cobra.Command, promptName string, args []string) error
 	timeout, _ := cmd.Flags().GetDuration("timeout")
 	parallel, _ := cmd.Flags().GetBool("parallel")
 	langFlag, _ := cmd.Flags().GetString("lang")
+	modelFlag, _ := cmd.Flags().GetString("model")
 
 	// Find template
 	if verbose {
@@ -150,6 +153,7 @@ func executeTemplate(cmd *cobra.Command, promptName string, args []string) error
 		Timeout:    timeout,
 		WorkingDir: workingDir,
 		Verbose:    verbose,
+		Model:      modelFlag,
 	})
 	if err != nil {
 		return fmt.Errorf("execution failed: %w", err)
@@ -175,7 +179,7 @@ func resolveProviders(parallel bool, providerName string, verbose bool) ([]provi
 	if parallel {
 		availableNames := detector.DetectAvailable()
 		if len(availableNames) == 0 {
-			return nil, fmt.Errorf("no available providers\n\nPlease install one of: claude, gemini, codex")
+			return nil, fmt.Errorf("no available providers\n\nPlease install one of: claude, gemini, codex, copilot")
 		}
 
 		providers := make([]provider.Provider, 0, len(availableNames))
@@ -188,7 +192,7 @@ func resolveProviders(parallel bool, providerName string, verbose bool) ([]provi
 		}
 
 		if len(providers) == 0 {
-			return nil, fmt.Errorf("no available providers\n\nPlease install one of: claude, gemini, codex")
+			return nil, fmt.Errorf("no available providers\n\nPlease install one of: claude, gemini, codex, copilot")
 		}
 
 		if verbose {
@@ -204,7 +208,7 @@ func resolveProviders(parallel bool, providerName string, verbose bool) ([]provi
 
 	prov, err := detector.GetFirstAvailable()
 	if err != nil {
-		return nil, fmt.Errorf("no available providers: %w\n\nPlease install one of: claude, gemini, codex", err)
+		return nil, fmt.Errorf("no available providers: %w\n\nPlease install one of: claude, gemini, codex, copilot", err)
 	}
 	if verbose {
 		fmt.Fprintf(os.Stderr, "Using auto-detected provider: %s\n", prov.Name())
@@ -238,7 +242,7 @@ func initConfig() {
 		fmt.Fprintf(os.Stderr, "Using default configuration.\n")
 		// Create default config
 		cfg = &config.Config{
-			ProviderPriority: []string{"claude", "gemini", "codex"},
+			ProviderPriority: []string{"claude", "gemini", "codex", "copilot"},
 			Providers: map[string]config.ProviderConfig{
 				"claude": {
 					Command: "claude",
@@ -247,17 +251,22 @@ func initConfig() {
 						"--output-format", "text",
 						"--settings", `{"attribution":{"commit":"","pr":""},"includeCoAuthoredBy":false,"gitAttribution":false}`,
 					},
-					Timeout: 120,
+					Timeout: 120 * time.Second,
 				},
 				"gemini": {
 					Command: "gemini",
 					Args:    []string{},
-					Timeout: 120,
+					Timeout: 120 * time.Second,
 				},
 				"codex": {
 					Command: "codex",
 					Args:    []string{},
-					Timeout: 120,
+					Timeout: 120 * time.Second,
+				},
+				"copilot": {
+					Command: "copilot",
+					Args:    []string{"-s"},
+					Timeout: 120 * time.Second,
 				},
 			},
 		}

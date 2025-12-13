@@ -34,3 +34,4 @@ GEMINI.md
 .cursor
 .ai-docs
 .gocache
+.cache/

@@ -16,6 +16,7 @@ type CodexProvider struct {
 	command string
 	args    []string
 	timeout time.Duration
+	model   string
 }
 
 // NewCodexProvider creates a new Codex provider
@@ -24,12 +25,13 @@ func NewCodexProvider(cfg *config.ProviderConfig) *CodexProvider {
 		command: cfg.Command,
 		args:    cfg.Args,
 		timeout: cfg.Timeout,
+		model:   strings.TrimSpace(cfg.Model),
 	}
 }
 
 // Name returns the provider identifier
 func (p *CodexProvider) Name() string {
-	return "codex"
+	return ProviderCodex
 }
 
 // Available checks if the Codex CLI is installed
@@ -59,7 +61,18 @@ func (p *CodexProvider) Execute(ctx context.Context, prompt string, opts Execute
 	// Codex CLI uses "exec" subcommand for non-interactive mode
 	// Use -o to output only the last message to a file
 	args := []string{"exec", "-o", tmpPath}
-	args = append(args, p.args...)
+	effectiveModel := strings.TrimSpace(opts.Model)
+	if effectiveModel == "" {
+		effectiveModel = p.model
+	}
+
+	baseArgs := append([]string{}, p.args...)
+	baseArgs = stripFlagWithValue(baseArgs, flagModel)
+	if effectiveModel != "" {
+		baseArgs = append(baseArgs, flagModel, effectiveModel)
+	}
+
+	args = append(args, baseArgs...)
 	args = append(args, prompt)
 
 	if opts.Verbose {

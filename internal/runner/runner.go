@@ -21,6 +21,7 @@ type ExecuteOptions struct {
 	Timeout    time.Duration
 	WorkingDir string
 	Verbose    bool
+	Model      string
 }
 
 // Run executes a prompt either with a single provider or in parallel.
@@ -44,6 +45,7 @@ func runSingle(ctx context.Context, opts ExecuteOptions, prov provider.Provider)
 		Timeout:    opts.Timeout,
 		WorkingDir: opts.WorkingDir,
 		Verbose:    opts.Verbose,
+		Model:      opts.Model,
 	})
 	if err != nil {
 		spinner.StopWithError("Execution failed")
@@ -71,6 +73,7 @@ func runParallel(ctx context.Context, opts ExecuteOptions) (string, error) {
 				Timeout:    opts.Timeout,
 				WorkingDir: opts.WorkingDir,
 				Verbose:    opts.Verbose,
+				Model:      opts.Model,
 			})
 			duration := time.Since(start)
 

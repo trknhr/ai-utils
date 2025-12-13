@@ -23,6 +23,7 @@ type Config struct {
 type ProviderConfig struct {
 	Command string        `mapstructure:"command"`
 	Args    []string      `mapstructure:"args"`
+	Model   string        `mapstructure:"model"`
 	Timeout time.Duration `mapstructure:"timeout"`
 }
 
@@ -121,7 +122,7 @@ func setDefaults(v *viper.Viper) {
 		promptDirs = append(promptDirs, globalPromptsDir)
 	}
 	v.SetDefault("prompt_dirs", promptDirs)
-	v.SetDefault("provider_priority", []string{"claude", "gemini", "codex"})
+	v.SetDefault("provider_priority", []string{"claude", "gemini", "codex", "copilot"})
 	v.SetDefault("output_lang", "en")
 
 	// Claude defaults
@@ -141,7 +142,14 @@ func setDefaults(v *viper.Viper) {
 	// Codex defaults
 	v.SetDefault("providers.codex.command", "codex")
 	v.SetDefault("providers.codex.args", []string{})
+	v.SetDefault("providers.codex.model", "")
 	v.SetDefault("providers.codex.timeout", 120*time.Second)
+
+	// Copilot defaults
+	v.SetDefault("providers.copilot.command", "copilot")
+	v.SetDefault("providers.copilot.args", []string{"-s"})
+	v.SetDefault("providers.copilot.model", "")
+	v.SetDefault("providers.copilot.timeout", 120*time.Second)
 
 	// Defaults
 	v.SetDefault("defaults.timeout", 60*time.Second)

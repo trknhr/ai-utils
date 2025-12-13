@@ -4,7 +4,7 @@
 
 <h1 align="center">AI Utils (aiu)</h1>
 
-A developer-friendly CLI tool that manages reusable prompt templates and executes them using locally installed AI CLIs (Claude Code, Gemini CLI, Codex CLI). It automatically detects available AI providers, expands shell commands within templates, and eliminates the need for API keys.
+A developer-friendly CLI tool that manages reusable prompt templates and executes them using locally installed AI CLIs (Claude Code, Gemini CLI, Codex CLI, GitHub Copilot CLI). It automatically detects available AI providers, expands shell commands within templates, and eliminates the need for API keys.
 
 ## Features
 
@@ -12,7 +12,7 @@ A developer-friendly CLI tool that manages reusable prompt templates and execute
 - **Dynamic Command Expansion**: Embed shell commands in templates using `{{$ command }}` syntax
 - **Template Arguments**: Pass arguments to templates (e.g., `aiu pr-review feature-branch main`)
 - **Built-in Templates**: PR description, PR review, and commit message templates included in binary
-- **Multi-Provider Support**: Automatically detects and uses Claude, Gemini, or Codex CLIs
+- **Multi-Provider Support**: Automatically detects and uses Claude, Gemini, Codex, or Copilot CLIs
 - **No API Keys Required**: Leverages your existing CLI installations
 
 ## Installation (macOS / Linux)
@@ -37,6 +37,7 @@ You need at least one of these installed:
 - **Claude Code**: Follow [ClaudeCode installation](https://github.com/anthropics/claude-code)
 - **Gemini CLI**: Follow [Gemini CLI installation](https://github.com/google-gemini/gemini-cli)
 - **Codex CLI**: Follow [Codex installation](https://github.com/openai/codex)
+- **GitHub Copilot CLI**: Install via `npm i -g @githubnext/github-copilot-cli` (or your preferred method)
 
 ### 2. Run a prompt
 
@@ -92,7 +93,7 @@ aiu disable-auto-commit
 
 1. **Template Loading**: Reads Markdown files with YAML frontmatter
 2. **Command Expansion**: Executes `{{$ command }}` placeholders and injects output
-3. **Provider Detection**: Automatically selects available AI CLI (Claude → Gemini → Codex)
+3. **Provider Detection**: Automatically selects available AI CLI (Claude → Gemini → Codex → Copilot)
 4. **Execution**: Sends expanded prompt to the provider and displays response
 
 ## Template System
@@ -160,6 +161,7 @@ provider_priority:
   - claude
   - gemini
   - codex
+  - copilot
 
 # Provider-specific settings
 providers:
@@ -174,6 +176,12 @@ providers:
   codex:
     command: codex
     args: []
+    model: ""
+    timeout: 120s
+  copilot:
+    command: copilot
+    args: ["-s"]
+    model: ""
     timeout: 120s
 
 # Defaults
