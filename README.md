@@ -37,7 +37,7 @@ You need at least one of these installed:
 - **Claude Code**: Follow [ClaudeCode installation](https://github.com/anthropics/claude-code)
 - **Gemini CLI**: Follow [Gemini CLI installation](https://github.com/google-gemini/gemini-cli)
 - **Codex CLI**: Follow [Codex installation](https://github.com/openai/codex)
-- **GitHub Copilot CLI**: Install via `npm i -g @githubnext/github-copilot-cli` (or your preferred method)
+- **GitHub Copilot CLI**: Follow [Codex installation](https://github.com/github/copilot-cli)
 
 ### 2. Run a prompt
 
@@ -54,6 +54,12 @@ aiu pr-review feature/xxx develop
 # Generate commit message from staged changes
 git add .
 aiu commit-msg
+
+# Use codex explicitly
+aiu pr-desc -P codex
+
+# Override model (wins over config)
+aiu pr-desc -P copilot --model gpt-5
 ```
 
 ### 3. Enable auto commit messages (optional)
@@ -87,7 +93,7 @@ aiu disable-auto-commit
 └─────────────┘                                 │
                                                 │ 3. Send Prompt
                  ┌──────────────────────────────▼─────┐
-                 │  AI Provider (Claude/Gemini/Codex) │
+                 │ AI Provider (Claude/Gemini/Codex/Copilot) │
                  └────────────────────────────────────┘
 ```
 
