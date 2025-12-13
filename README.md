@@ -246,6 +246,13 @@ aiu pr-review --dry-run
 aiu pr-desc --provider gemini
 ```
 
+### Parallel Providers
+
+```bash
+# Run all available providers in parallel, then choose the best output
+aiu pr-desc -p
+```
+
 ## Development
 
 ### Build from Source

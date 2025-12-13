@@ -60,7 +60,14 @@ func runParallel(ctx context.Context, opts ExecuteOptions) (string, error) {
 	fmt.Fprintln(os.Stderr, ui.Logo)
 	fmt.Fprintln(os.Stderr, "⚡ Running providers in parallel...")
 
+	type indexedResult struct {
+		idx int
+		res model.GenerationResult
+	}
+
 	results := make([]model.GenerationResult, len(opts.Providers))
+	resultCh := make(chan indexedResult, len(opts.Providers))
+	progressLinesPrinted := 0
 
 	var wg sync.WaitGroup
 	for i, prov := range opts.Providers {
@@ -82,22 +89,36 @@ func runParallel(ctx context.Context, opts ExecuteOptions) (string, error) {
 				filePath, err = writeResultFile(p.Name(), content)
 			}
 
-			results[idx] = model.GenerationResult{
+			resultCh <- indexedResult{idx: idx, res: model.GenerationResult{
 				Provider: p.Name(),
 				FilePath: filePath,
 				Content:  content,
 				Duration: duration,
 				Err:      err,
-			}
+			}}
 		}(i, prov)
 	}
 
-	wg.Wait()
+	go func() {
+		wg.Wait()
+		close(resultCh)
+	}()
+
+	for item := range resultCh {
+		results[item.idx] = item.res
+
+		progressLinesPrinted++
+		if item.res.Err != nil {
+			fmt.Fprintf(os.Stderr, "✗ %s failed (%.1fs): %v\n", item.res.Provider, item.res.Duration.Seconds(), item.res.Err)
+			continue
+		}
+		fmt.Fprintf(os.Stderr, "✓ %s done (%.1fs): %s\n", item.res.Provider, item.res.Duration.Seconds(), item.res.FilePath)
+	}
 
 	successes := make([]model.GenerationResult, 0, len(results))
 	for _, res := range results {
 		if res.Err != nil {
-			fmt.Fprintf(os.Stderr, "✗ %s failed: %v\n", res.Provider, res.Err)
+			// Failure already printed progressively above.
 			continue
 		}
 		successes = append(successes, res)
@@ -113,5 +134,26 @@ func runParallel(ctx context.Context, opts ExecuteOptions) (string, error) {
 	}
 	openInVSCode(filePaths)
 
+	clearLastTerminalLines(os.Stderr, progressLinesPrinted)
+
 	return ui.SelectResult(successes)
+}
+
+func clearLastTerminalLines(f *os.File, lines int) {
+	if lines <= 0 || !isCharDevice(f) {
+		return
+	}
+
+	// Move up and clear each line. This keeps earlier logs (e.g. header/logo) intact.
+	for i := 0; i < lines; i++ {
+		fmt.Fprint(f, "\x1b[1A\x1b[2K\r")
+	}
+}
+
+func isCharDevice(f *os.File) bool {
+	fi, err := f.Stat()
+	if err != nil {
+		return false
+	}
+	return (fi.Mode() & os.ModeCharDevice) != 0
 }
