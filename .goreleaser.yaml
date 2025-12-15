@@ -1,4 +1,5 @@
 project_name: aiu
+version: 2
 
 builds:
   - id: cli
@@ -15,7 +16,7 @@ builds:
       - -s -w
 
 archives:
-  - format: tar.gz
+  - formats: [tar.gz]
     files:
       - LICENSE
       - README.md
@@ -27,3 +28,19 @@ release:
   github:
     owner: trknhr
     name: ai-utils
+
+brews:
+  - name: aiu
+    description: "AI Utils - Execute prompts with local AI CLIs"
+    homepage: "https://github.com/trknhr/ai-utils"
+    license: "Apache-2.0"
+    repository:
+      owner: trknhr
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    skip_upload: "{{ if .Env.HOMEBREW_TAP_TOKEN }}false{{ else }}true{{ end }}"
+    install: |
+      bin.install "aiu"
+    test: |
+      system "#{bin}/aiu", "--help"

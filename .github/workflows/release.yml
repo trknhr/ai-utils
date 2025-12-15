@@ -29,3 +29,4 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 必須：GitHub Releases への認証
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }} # 任意：homebrew-tap 更新用（別repoへpushするためPATが必要）
