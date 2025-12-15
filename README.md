@@ -17,6 +17,18 @@ A developer-friendly CLI tool that manages reusable prompt templates and execute
 
 ## Installation (macOS / Linux)
 
+### Homebrew
+
+```bash
+brew tap trknhr/homebrew-tap
+brew install aiu
+
+# Upgrade
+brew upgrade aiu
+```
+
+### install.sh
+
 Install the latest release via:
 
 ```bash
