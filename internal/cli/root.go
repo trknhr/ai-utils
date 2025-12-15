@@ -18,6 +18,9 @@ var (
 	detector *provider.Detector
 )
 
+// Version is populated at build time via ldflags.
+var Version = "dev"
+
 // rootCmd represents the base command
 var rootCmd = &cobra.Command{
 	Use:   "aiu",
@@ -38,6 +41,9 @@ func Execute() error {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	rootCmd.Version = Version
+	rootCmd.SetVersionTemplate("{{.Version}}\n")
 
 	// Global flags
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
