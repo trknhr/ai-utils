@@ -262,7 +262,15 @@ aiu pr-desc --provider gemini
 
 ```bash
 # Run all available providers in parallel, then choose the best output
-aiu pr-desc -p
+aiu pr-desc --multiple
+# or: aiu pr-desc -m
+```
+
+### Direct Prompt (Skip Template)
+
+```bash
+# Send prompt text directly (no template expansion)
+aiu run -p "Write a PR description for this change"
 ```
 
 ## Development

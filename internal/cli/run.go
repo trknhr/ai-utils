@@ -6,7 +6,7 @@ import (
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run <prompt-name> [args...]",
+	Use:   "run [prompt-name] [args...]",
 	Short: "Execute a prompt template",
 	Long: `Execute a prompt template by name.
 
@@ -21,8 +21,9 @@ Examples:
   aiu run pr-desc
   aiu run pr-review develop          # $1=develop, compare with origin/develop
   aiu run commit-msg --provider claude
-  aiu run review --dry-run`,
-	Args: cobra.MinimumNArgs(1),
+  aiu run review --dry-run
+  aiu run -p "Hello"`,
+	Args: cobra.ArbitraryArgs,
 	RunE: runPrompt,
 }
 
@@ -31,11 +32,21 @@ func init() {
 
 	runCmd.Flags().Bool("dry-run", false, "show expanded prompt without executing")
 	runCmd.Flags().Duration("timeout", 0, "execution timeout (default: from config)")
-	runCmd.Flags().BoolP("parallel", "p", false, "run available providers in parallel and choose the output")
+	runCmd.Flags().BoolP("multiple", "m", false, "run available providers in parallel and choose the output")
+	runCmd.Flags().StringP("prompt", "p", "", "send prompt directly (skip template expansion)")
 }
 
 func runPrompt(cmd *cobra.Command, args []string) error {
-	promptName := args[0]
-	templateArgs := args[1:]
+	promptDirect, _ := cmd.Flags().GetString("prompt")
+	if promptDirect == "" && len(args) < 1 {
+		return cobra.MinimumNArgs(1)(cmd, args)
+	}
+
+	var promptName string
+	var templateArgs []string
+	if len(args) > 0 {
+		promptName = args[0]
+		templateArgs = args[1:]
+	}
 	return executeTemplate(cmd, promptName, templateArgs)
 }

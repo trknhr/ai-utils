@@ -71,7 +71,7 @@ func registerTemplateCommands() {
 		}
 		cmd.Flags().Bool("dry-run", false, "show expanded prompt without executing")
 		cmd.Flags().Duration("timeout", 0, "execution timeout (default: from config)")
-		cmd.Flags().BoolP("parallel", "p", false, "run available providers in parallel and choose the output")
+		cmd.Flags().BoolP("multiple", "m", false, "run available providers in parallel and choose the output")
 		rootCmd.AddCommand(cmd)
 	}
 }
@@ -83,55 +83,64 @@ func executeTemplate(cmd *cobra.Command, promptName string, args []string) error
 	workingDir, _ := cmd.Flags().GetString("working-dir")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
 	timeout, _ := cmd.Flags().GetDuration("timeout")
-	parallel, _ := cmd.Flags().GetBool("parallel")
+	multiple, _ := cmd.Flags().GetBool("multiple")
+	var promptDirect string
+	if cmd.Flags().Lookup("prompt") != nil {
+		promptDirect, _ = cmd.Flags().GetString("prompt")
+	}
 	langFlag, _ := cmd.Flags().GetString("lang")
 	modelFlag, _ := cmd.Flags().GetString("model")
 
-	// Find template
-	if verbose {
-		fmt.Printf("Looking for template: %s\n", promptName)
-	}
-
-	var tmpl *template.Template
-	var err error
-
-	// First, try to find in user directories
-	templatePath, findErr := template.FindTemplate(promptName, cfg.PromptDirs)
-	if findErr == nil {
-		if verbose {
-			fmt.Printf("Found template: %s\n", templatePath)
-		}
-		tmpl, err = template.Parse(templatePath)
-		if err != nil {
-			return fmt.Errorf("failed to parse template: %w", err)
-		}
+	var expandedPrompt string
+	if strings.TrimSpace(promptDirect) != "" {
+		expandedPrompt = promptDirect
 	} else {
-		// Fallback to builtin templates
-		var ok bool
-		tmpl, ok = template.GetBuiltinTemplate(promptName)
-		if !ok {
-			return fmt.Errorf("template not found: %s", promptName)
-		}
+		// Find template
 		if verbose {
-			fmt.Printf("Using builtin template: %s\n", promptName)
+			fmt.Printf("Looking for template: %s\n", promptName)
 		}
-	}
 
-	if verbose {
-		fmt.Printf("Template:\n%s\n", tmpl.String())
-	}
+		var tmpl *template.Template
+		var err error
 
-	// Validate template requirements
-	if err := tmpl.Validate(); err != nil {
-		return fmt.Errorf("template validation failed: %w", err)
-	}
+		// First, try to find in user directories
+		templatePath, findErr := template.FindTemplate(promptName, cfg.PromptDirs)
+		if findErr == nil {
+			if verbose {
+				fmt.Printf("Found template: %s\n", templatePath)
+			}
+			tmpl, err = template.Parse(templatePath)
+			if err != nil {
+				return fmt.Errorf("failed to parse template: %w", err)
+			}
+		} else {
+			// Fallback to builtin templates
+			var ok bool
+			tmpl, ok = template.GetBuiltinTemplate(promptName)
+			if !ok {
+				return fmt.Errorf("template not found: %s", promptName)
+			}
+			if verbose {
+				fmt.Printf("Using builtin template: %s\n", promptName)
+			}
+		}
 
-	// Expand template (execute commands)
-	executor := template.NewExecutor(workingDir, verbose, args)
+		if verbose {
+			fmt.Printf("Template:\n%s\n", tmpl.String())
+		}
 
-	expandedPrompt, err := executor.Execute(tmpl)
-	if err != nil {
-		return fmt.Errorf("failed to expand template: %w", err)
+		// Validate template requirements
+		if err := tmpl.Validate(); err != nil {
+			return fmt.Errorf("template validation failed: %w", err)
+		}
+
+		// Expand template (execute commands)
+		executor := template.NewExecutor(workingDir, verbose, args)
+
+		expandedPrompt, err = executor.Execute(tmpl)
+		if err != nil {
+			return fmt.Errorf("failed to expand template: %w", err)
+		}
 	}
 
 	expandedPrompt = appendLanguageHint(expandedPrompt, langFlag, cfg.OutputLang)
@@ -146,14 +155,14 @@ func executeTemplate(cmd *cobra.Command, promptName string, args []string) error
 	}
 
 	// Select providers
-	providers, err := resolveProviders(parallel, providerName, verbose)
+	providers, err := resolveProviders(multiple, providerName, verbose)
 	if err != nil {
 		return err
 	}
 
 	// Execute with runner
 	result, err := runner.Run(cmd.Context(), runner.ExecuteOptions{
-		Parallel:   parallel,
+		Parallel:   multiple,
 		Prompt:     expandedPrompt,
 		Providers:  providers,
 		Timeout:    timeout,
