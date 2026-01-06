@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/trknhr/ai-utils/internal/config"
@@ -255,36 +254,6 @@ func initConfig() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: Failed to load config: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Using default configuration.\n")
-		// Create default config
-		cfg = &config.Config{
-			ProviderPriority: []string{"claude", "gemini", "codex", "copilot"},
-			Providers: map[string]config.ProviderConfig{
-				"claude": {
-					Command: "claude",
-					Args: []string{
-						"-p",
-						"--output-format", "text",
-						"--settings", `{"attribution":{"commit":"","pr":""},"includeCoAuthoredBy":false,"gitAttribution":false}`,
-					},
-					Timeout: 120 * time.Second,
-				},
-				"gemini": {
-					Command: "gemini",
-					Args:    []string{},
-					Timeout: 120 * time.Second,
-				},
-				"codex": {
-					Command: "codex",
-					Args:    []string{},
-					Timeout: 120 * time.Second,
-				},
-				"copilot": {
-					Command: "copilot",
-					Args:    []string{"-s"},
-					Timeout: 120 * time.Second,
-				},
-			},
-		}
 	}
 
 	detector = provider.NewDetector(cfg)
